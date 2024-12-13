@@ -27,9 +27,9 @@
                 <MenuItem x:Name="Menu_Aantal_Pogingen" Header="Aantal pogingen" Click="Menu_Aantal_Pogingen_Click"  Background="Black" Foreground="White"/>
             </MenuItem>
         </Menu>
-        <StackPanel>
-            <TextBox x:Name="generatedCodeTextBox" BorderThickness="0" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Height="30" VerticalAlignment="Center" IsEnabled="False"  Background="Black" Foreground="White"/>
-            <Label x:Name="labelScore" BorderThickness="0" Height="30" IsEnabled="False"  Background="Black" Foreground="White" />
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Grid.ColumnSpan="4">
+            <TextBox x:Name="generatedCodeTextBox" BorderThickness="0" Height="30" IsEnabled="False"  Background="Black" Foreground="White"/>
+            <Label x:Name="labelScore" BorderThickness="0" Height="30" IsEnabled="False"  Background="Black" Foreground="White"/>
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Column="3" Grid.Row="0" VerticalAlignment="Center">
             <TextBox x:Name="timerTextBox" BorderThickness="0" Height="30" VerticalAlignment="Center" IsEnabled="False" 

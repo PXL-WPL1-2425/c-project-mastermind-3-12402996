@@ -90,11 +90,11 @@ namespace C_mastermindSprint1
                         }
                     }
                 }
-                playerName = multiplePlayers[0]; // Start met de eerste speler
+                playerName = multiplePlayers[0];
             }
             SetMaxAttempts();
             StartCountDown();
-            this.Title = $"Speler: {playerName} - Poging: {guessAttempts}";
+            labelScore.Content = $"Speler: {playerName} - Score: {score} - Pogingen: {guessAttempts}";
         }
         private void HighScore()
         {
@@ -272,6 +272,7 @@ namespace C_mastermindSprint1
             score -= penaltyPoints; // Aftrekken van strafpunten van de score
             scoreTextBox.Text = $"Score: {score}"; // Bijwerken van de score
 
+            labelScore.Content = $"Speler: {playerName} - Score: {score} - Pogingen: {guessAttempts}";
             if (inputColor.SequenceEqual(secretCode))
             {
                 timer.Stop();
