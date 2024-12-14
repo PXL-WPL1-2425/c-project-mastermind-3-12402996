@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualBasic;
+using System;
 using System.Diagnostics;
 using System.Printing;
 using System.Reflection;
@@ -44,28 +45,42 @@ namespace C_mastermindSprint1
             InitializeComponent();
             this.Height = 700;
             this.Width = 550;
+            this.Title = $"Poging: {guessAttempts}";
         }
-        private void SetMaxAttempts()
+        private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            string input = string.Empty;
-            int attempts = 0;
-
-            while (true)
+            var randomCode = new Random();
+            for (int i = 0; i < 4; i++)
             {
-                input = Interaction.InputBox("Voer het maximaal aantal pogingen in (tussen 3 en 20):", "Maximaal Aantal Pogingen", maxAttempts.ToString());
-
-                if (int.TryParse(input, out attempts) && attempts >= 3 && attempts <= 20)
-                {
-                    maxAttempts = attempts;
-                    break;
-                }
-                else
-                {
-                    MessageBox.Show("Ongeldige invoer. Voer een getal in tussen 3 en 20.", "Ongeldige Invoer", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
+                secretCode.Add(colors[randomCode.Next(colors.Count)]);
             }
-        }
 
+            generatedCodeTextBox.Text = $"{secretCode}".ToString();
+            generatedCodeTextBox.Visibility = Visibility.Collapsed;
+            StartGame();
+        }
+        private void StartCountDown()
+        {
+            timer.Interval = TimeSpan.FromMilliseconds(100);
+            timer.Tick += Timer_Tick;
+            startedGuessTime = DateTime.Now;
+            timer.Start();
+        }
+        /// <summary>
+        /// Start de interval van de timer en zorgt ervoor dat de timer elke 100 milliseconden telt.
+        /// </summary>
+        private void Timer_Tick(object? sender, EventArgs e)
+        {
+            // Deel 1. Bereken tijdsverschil
+            TimeSpan timeUsedToGuess = DateTime.Now - startedGuessTime;
+            // Deel 2. controle, if time > 10 seconds
+            if (timeUsedToGuess.TotalSeconds > 10)
+            {
+                StopCountDown();
+                startedGuessTime = DateTime.Now;
+            }
+            timerTextBox.Text = timeUsedToGuess.TotalSeconds.ToString("N0");
+        }
         private void StartGame()
         {
             if (multiplePlayers.Count == 0)
@@ -96,100 +111,6 @@ namespace C_mastermindSprint1
             StartCountDown();
             labelScore.Content = $"Speler: {playerName} - Score: {score} - Pogingen: {guessAttempts}";
         }
-        private void HighScore()
-        {
-            StringBuilder opslaanHighScore = new StringBuilder();
-            foreach (string s in highscores)
-            {
-                if (!string.IsNullOrEmpty(s))
-                {
-                    opslaanHighScore.AppendLine(s);
-                }
-            }
-            MessageBox.Show(opslaanHighScore.ToString(), "Highscores", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            var randomCode = new Random();
-            for (int i = 0; i < 4; i++)
-            {
-                secretCode.Add(colors[randomCode.Next(colors.Count)]);
-            }
-
-            generatedCodeTextBox.Text = $"{secretCode}".ToString();
-            this.Title = $"Poging: {guessAttempts}";
-            generatedCodeTextBox.Visibility = Visibility.Collapsed;
-            StartGame();
-        }
-
-        private void ellipseOne_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (sender is Ellipse ellipse)
-            {
-                if (ellipse.Fill == null)
-                {
-                    ellipse.Fill = ellipseColor[0];
-                }
-                else
-                {
-                    // Get the current brush of the ellipse
-                    Brush currentBrush = ellipse.Fill;
-
-                    // Find the current brush in the list
-                    int currentIndex = ellipseColor.IndexOf(currentBrush);
-
-                    // Calculate the index of the next brush
-                    int nextIndex = (currentIndex - 1 + ellipseColor.Count) % ellipseColor.Count;
-
-                    // Get the next brush
-                    Brush nextBrush = ellipseColor[nextIndex];
-
-                    // Set the ellipse's fill to the next brush
-                    ellipse.Fill = nextBrush;
-
-                }
-            }
-        }
-
-        private void ellipseOne_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (sender is Ellipse ellipse)
-            {
-                if (ellipse.Fill == null)
-                {
-                    ellipse.Fill = ellipseColor[0];
-                }
-                else
-                {
-                    // Get the current brush of the ellipse
-                    Brush currentBrush = ellipse.Fill;
-
-                    // Find the current brush in the list
-                    int currentIndex = ellipseColor.IndexOf(currentBrush);
-
-                    // Calculate the index of the next brush
-                    int nextIndex = (currentIndex + 1) % ellipseColor.Count;
-
-                    // Get the next brush
-                    Brush nextBrush = ellipseColor[nextIndex];
-
-                    // Set the ellipse's fill to the next brush
-                    ellipse.Fill = nextBrush;
-                }
-            }
-        }
-        private void Timer_Tick(object? sender, EventArgs e)
-        {
-            // Deel 1. Bereken tijdsverschil
-            TimeSpan timeUsedToGuess = DateTime.Now - startedGuessTime;
-            // Deel 2. controle, if time > 10 seconds
-            if (timeUsedToGuess.TotalSeconds > 10)
-            {
-                StopCountDown();
-                startedGuessTime = DateTime.Now;
-            }
-            timerTextBox.Text = timeUsedToGuess.TotalSeconds.ToString("N0");
-        }
         /// <summary>
         /// Deze methode zorgt eerst en vooral ervoor dat de timer stopt en vervolgens de poging verhoogt. 
         /// Nadien wordt er een messagebox getoond.
@@ -213,15 +134,25 @@ namespace C_mastermindSprint1
             }
 
         }
-        /// <summary>
-        /// Start de interval van de timer en zorgt ervoor dat de timer elke 100 milliseconden telt.
-        /// </summary>
-        private void StartCountDown()
+        private void SetMaxAttempts()
         {
-            timer.Interval = TimeSpan.FromMilliseconds(100);
-            timer.Tick += Timer_Tick;
-            startedGuessTime = DateTime.Now;
-            timer.Start();
+            string input = string.Empty;
+            int attempts = 0;
+
+            while (true)
+            {
+                input = Interaction.InputBox("Voer het maximaal aantal pogingen in (tussen 3 en 20):", "Maximaal Aantal Pogingen", maxAttempts.ToString());
+
+                if (int.TryParse(input, out attempts) && attempts >= 3 && attempts <= 20)
+                {
+                    maxAttempts = attempts;
+                    break;
+                }
+                else
+                {
+                    MessageBox.Show("Ongeldige invoer. Voer een getal in tussen 3 en 20.", "Ongeldige Invoer", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
         }
         private void checkButton_Click(object sender, RoutedEventArgs e)
         {
@@ -293,7 +224,59 @@ namespace C_mastermindSprint1
                     ResetGame();
                 }
             }
-            this.Title = $"Speler: {playerName} - Poging: {guessAttempts}";
+            this.Title = $"Poging: {guessAttempts}";
+        }
+        private string GetNextPlayer()
+        {
+            if (multiplePlayers.Count == 0)
+            {
+                return string.Empty;
+            }
+            else
+            {
+                int currentIndex = multiplePlayers.IndexOf(playerName);
+                int nextIndex = (currentIndex + 1) % multiplePlayers.Count;
+                return multiplePlayers[nextIndex];
+            }
+        }
+        private void ResetGame()
+        {
+            secretCode.Clear();
+            var randomCode = new Random();
+            for (int i = 0; i < 4; i++)
+            {
+                secretCode.Add(colors[randomCode.Next(colors.Count)]);
+            }
+            timerTextBox.Text = $"Score: {score}";
+            colorHistoryListBox.Items.Clear();
+            this.Title = $"Poging: {guessAttempts}";
+            scoreTextBox.Clear();
+            ellipseOne.Fill = ellipseColor[0];
+            ellipseTwo.Fill = ellipseColor[0];
+            ellipseThree.Fill = ellipseColor[0];
+            ellipseFour.Fill = ellipseColor[0];
+
+            if (multiplePlayers.IndexOf(playerName) == multiplePlayers.Count - 1)
+            {
+                playerName = multiplePlayers[0];
+            }
+            else
+            {
+                playerName = GetNextPlayer();
+            }
+            StartGame();
+        }
+        private void HighScore()
+        {
+            StringBuilder opslaanHighScore = new StringBuilder();
+            foreach (string s in highscores)
+            {
+                if (!string.IsNullOrEmpty(s))
+                {
+                    opslaanHighScore.AppendLine(s);
+                }
+            }
+            MessageBox.Show(opslaanHighScore.ToString(), "Highscores", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         private void UpdateHighScores()
         {
@@ -306,37 +289,6 @@ namespace C_mastermindSprint1
                     break;
                 }
             }
-        }
-
-        private void ResetGame()
-        {
-            secretCode.Clear();
-            var randomCode = new Random();
-            for (int i = 0; i < 4; i++)
-            {
-                secretCode.Add(colors[randomCode.Next(colors.Count)]);
-            }
-
-            guessAttempts = 0;
-            score = 100;
-            timerTextBox.Text = $"Score: {score}";
-            colorHistoryListBox.Items.Clear();
-            this.Title = $"Poging: {guessAttempts}";
-            scoreTextBox.Clear();
-            ellipseOne.Fill = ellipseColor[0];
-            ellipseTwo.Fill = ellipseColor[0];
-            ellipseThree.Fill = ellipseColor[0];
-            ellipseFour.Fill = ellipseColor[0];
-            
-            if (multiplePlayers.IndexOf(playerName) == multiplePlayers.Count - 1)
-            {
-                playerName = multiplePlayers[0];
-            }
-            else
-            {
-                playerName = GetNextPlayer();
-            }
-            StartGame();
         }
         private int CalculatePenaltyPoints(List<string> userGuess)
         {
@@ -368,7 +320,6 @@ namespace C_mastermindSprint1
             sb.Append(guessAttempts);
             this.Title = sb.ToString();
         }
-
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.F12)
@@ -395,39 +346,118 @@ namespace C_mastermindSprint1
                 }
             }
         }
+        private void ellipseOne_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Ellipse ellipse)
+            {
+                if (ellipse.Fill == null)
+                {
+                    ellipse.Fill = ellipseColor[0];
+                }
+                else
+                {
+                    // Get the current brush of the ellipse
+                    Brush currentBrush = ellipse.Fill;
 
+                    // Find the current brush in the list
+                    int currentIndex = ellipseColor.IndexOf(currentBrush);
+
+                    // Calculate the index of the next brush
+                    int nextIndex = (currentIndex - 1 + ellipseColor.Count) % ellipseColor.Count;
+
+                    // Get the next brush
+                    Brush nextBrush = ellipseColor[nextIndex];
+
+                    // Set the ellipse's fill to the next brush
+                    ellipse.Fill = nextBrush;
+
+                }
+            }
+        }
+        private void ellipseOne_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Ellipse ellipse)
+            {
+                if (ellipse.Fill == null)
+                {
+                    ellipse.Fill = ellipseColor[0];
+                }
+                else
+                {
+                    // Get the current brush of the ellipse
+                    Brush currentBrush = ellipse.Fill;
+
+                    // Find the current brush in the list
+                    int currentIndex = ellipseColor.IndexOf(currentBrush);
+
+                    // Calculate the index of the next brush
+                    int nextIndex = (currentIndex + 1) % ellipseColor.Count;
+
+                    // Get the next brush
+                    Brush nextBrush = ellipseColor[nextIndex];
+
+                    // Set the ellipse's fill to the next brush
+                    ellipse.Fill = nextBrush;
+                }
+            }
+        }
         private void Menu_Nieuw_Spel_Click(object sender, RoutedEventArgs e)
         {
             ResetGame();
         }
-
         private void Menu_HighScores_Click(object sender, RoutedEventArgs e)
         {
             HighScore();
         }
-
         private void Menu_Afsluiten_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
-
         private void Menu_Aantal_Pogingen_Click(object sender, RoutedEventArgs e)
         {
             SetMaxAttempts();
         }
 
-        private string GetNextPlayer()
+        private void buyHintButton_Click(object sender, RoutedEventArgs e)
         {
-            if (multiplePlayers.Count == 0)
+            timer.Stop();
+            MessageBoxResult result = MessageBox.Show("Wil je een hint kopen, het kost je wel strafpunten?", "Hint", 
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
             {
-                return string.Empty;
+                MessageBoxResult hintResult = 
+                    MessageBox.Show($"Ja: een juiste kleur (kost 15 strafpunten).\n"
+                    + "Nee: een juiste kleur en positie (kost 30 strafpunten).\n"
+                    , "Hint", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (hintResult == MessageBoxResult.Yes)
+                {
+                    CorrectColor();
+                    score -= 15;
+                    scoreTextBox.Text = $"Score: {score}";
+                }
+                else if (hintResult == MessageBoxResult.No)
+                {
+                    CorrectColorAndPosition();
+                    score -= 30;
+                    scoreTextBox.Text = $"Score: {score}";
+                }
+                scoreTextBox.Text = $"Score: {score}";
+                labelScore.Content = $"Speler: {playerName} - Score: {score} - Pogingen: {guessAttempts}";
             }
-            else
-            {
-                int currentIndex = multiplePlayers.IndexOf(playerName);
-                int nextIndex = (currentIndex + 1) % multiplePlayers.Count;
-                return multiplePlayers[nextIndex];
-            }
+            timer.Start();
+        }
+        private void CorrectColor()
+        {
+            Random hintCorrectColor = new Random();
+            string correctColor = secretCode[hintCorrectColor.Next(secretCode.Count)];
+            MessageBox.Show($"Kleur:\n {correctColor}", "Hint", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        private void CorrectColorAndPosition()
+        {
+            Random hintCorrectColorAndPosition = new Random();
+            int correctColorAndPosition = hintCorrectColorAndPosition.Next(secretCode.Count);
+            string correctColor = secretCode[correctColorAndPosition];
+            MessageBox.Show($"Kleur + positie {correctColorAndPosition + 1} is: {correctColor}", "Hint", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 }
