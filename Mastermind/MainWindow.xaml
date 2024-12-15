@@ -38,17 +38,22 @@
                  VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Background="Black" Foreground="White"/>
         </StackPanel>
         <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Center" Height="85">
-            <Ellipse x:Name="ellipseOne" Fill="Red" Grid.Column="0" Height="85" Width="85" MouseLeftButtonDown="ellipseOne_MouseLeftButtonDown" MouseRightButtonDown="ellipseOne_MouseRightButtonDown"/>
-            <Ellipse x:Name="ellipseTwo" Fill="Red" Grid.Column="1" Height="85" Width="85" MouseLeftButtonDown="ellipseOne_MouseLeftButtonDown" MouseRightButtonDown="ellipseOne_MouseRightButtonDown"/>
-            <Ellipse x:Name="ellipseThree" Fill="Red" Grid.Column="3" Height="85" Width="85" MouseLeftButtonDown="ellipseOne_MouseLeftButtonDown" MouseRightButtonDown="ellipseOne_MouseRightButtonDown"/>
-            <Ellipse x:Name="ellipseFour" Fill="Red" Grid.Column="4" Height="85" Width="85" MouseLeftButtonDown="ellipseOne_MouseLeftButtonDown" MouseRightButtonDown="ellipseOne_MouseRightButtonDown"/>
+            <Ellipse x:Name="ellipseOne" Fill="Red" Grid.Column="0" Height="85" Width="85" 
+                     MouseLeftButtonDown="ellipseOne_MouseLeftButtonDown" MouseRightButtonDown="ellipseOne_MouseRightButtonDown"/>
+            <Ellipse x:Name="ellipseTwo" Fill="Red" Grid.Column="1" Height="85" Width="85" 
+                     MouseLeftButtonDown="ellipseOne_MouseLeftButtonDown" MouseRightButtonDown="ellipseOne_MouseRightButtonDown"/>
+            <Ellipse x:Name="ellipseThree" Fill="Red" Grid.Column="3" Height="85" Width="85" 
+                     MouseLeftButtonDown="ellipseOne_MouseLeftButtonDown" MouseRightButtonDown="ellipseOne_MouseRightButtonDown"/>
+            <Ellipse x:Name="ellipseFour" Fill="Red" Grid.Column="4" Height="85" Width="85" 
+                     MouseLeftButtonDown="ellipseOne_MouseLeftButtonDown" MouseRightButtonDown="ellipseOne_MouseRightButtonDown"/>
         </StackPanel>
         <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="4" Orientation="Vertical" HorizontalAlignment="Center">
             <Button x:Name="checkButton" BorderThickness="0" Height="30" Width="100" VerticalAlignment="Bottom"  Content="Check Button" Background="Black" Foreground="White" FontWeight="UltraBold" Click="checkButton_Click"/>
             <Button x:Name="buyHintButton" Content="Koop Hint" BorderThickness="0" Height="30" Width="100" VerticalAlignment="Bottom" Background="Black" Foreground="White" FontWeight="UltraBold" Click="buyHintButton_Click"/>
         </StackPanel>
         <ListBox x:Name="colorHistoryListBox" BorderThickness="0" Grid.ColumnSpan="4" Grid.Row="2" 
-                 Background="Black" Width="200" VerticalAlignment="Center" 
-                 VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                 Background="Black" Width="400" VerticalAlignment="Center"
+                 VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
+        </ListBox>
     </Grid>
 </Window>

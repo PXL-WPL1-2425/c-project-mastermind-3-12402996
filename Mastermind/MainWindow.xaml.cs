@@ -40,12 +40,13 @@ namespace C_mastermindSprint1
         string playerName;
         int maxAttempts = 0;
         private List<string> multiplePlayers = new List<string>();
+        private TimeSpan remainingTime;
         public MainWindow()
         {
             InitializeComponent();
             this.Height = 700;
             this.Width = 550;
-            this.Title = $"Poging: {guessAttempts}";
+            this.Title = $"Speler: {playerName} - Poging: {guessAttempts}";
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -106,8 +107,8 @@ namespace C_mastermindSprint1
                     }
                 }
                 playerName = multiplePlayers[0];
+                SetMaxAttempts();
             }
-            SetMaxAttempts();
             StartCountDown();
             labelScore.Content = $"Speler: {playerName} - Score: {score} - Pogingen: {guessAttempts}";
         }
@@ -120,39 +121,47 @@ namespace C_mastermindSprint1
         {
             timer.Stop();
             guessAttempts++;
-            if (guessAttempts >= maxAttempts)
+
+            List<string> emptyGuess = new List<string> { "", "", "", "" };
+            int penaltyPoints = CalculatePenaltyPoints(emptyGuess);
+            score -= penaltyPoints;
+
+            if (guessAttempts >= maxAttempts || score <= 0)
             {
+                score = 0;
                 MessageBox.Show($"Je hebt geen pogingen meer over. De correcte code was " +
                     $"{string.Join(", ", secretCode)}.\n Nu is speler {GetNextPlayer()} aan de beurt", $"{playerName}", MessageBoxButton.OK, MessageBoxImage.Information);
                 ResetGame();
             }
             else
             {
-                MessageBox.Show("Je beurt is over, probeer opnieuw", "Je tijd is verstreken, To Slow.", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Je beurt is over.\nProbeer opnieuw", "Je tijd is verstreken.", MessageBoxButton.OK, MessageBoxImage.Warning);
                 this.Title = $"Poging: {guessAttempts}";
                 StartCountDown();
             }
-
+            labelScore.Content = $"Speler: {playerName} - Score: {score} - Pogingen: {guessAttempts}";
         }
         private void SetMaxAttempts()
         {
-            string input = string.Empty;
-            int attempts = 0;
-
-            while (true)
+            if (maxAttempts == 0)
             {
-                input = Interaction.InputBox("Voer het maximaal aantal pogingen in (tussen 3 en 20):", "Maximaal Aantal Pogingen", maxAttempts.ToString());
+                string input = string.Empty;
+                int attempts = 0;
 
-                if (int.TryParse(input, out attempts) && attempts >= 3 && attempts <= 20)
+                while (true)
                 {
-                    maxAttempts = attempts;
-                    break;
-                }
-                else
-                {
-                    MessageBox.Show("Ongeldige invoer. Voer een getal in tussen 3 en 20.", "Ongeldige Invoer", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-            }
+                    input = Interaction.InputBox("Voer het maximaal aantal pogingen in (tussen 3 en 20):", "Maximaal Aantal Pogingen", maxAttempts.ToString());
+
+                    if (int.TryParse(input, out attempts) && attempts >= 3 && attempts <= 20)
+                    {
+                        maxAttempts = attempts;
+                        break;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Ongeldige invoer. Voer een getal in tussen 3 en 20.", "Ongeldige Invoer", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+            }   }
         }
         private void checkButton_Click(object sender, RoutedEventArgs e)
         {
@@ -183,18 +192,21 @@ namespace C_mastermindSprint1
                 {
                     rect.StrokeThickness = 5;
                     rect.Stroke = Brushes.DarkRed;
+                    rect.ToolTip = "Juiste kleur\nJuiste positie";
                 }
                 else if (secretCode.Contains(inputColor[i]))
                 {
                     rect.StrokeThickness = 5;
                     rect.Stroke = Brushes.Wheat;
+                    rect.ToolTip = "Juiste kleur\nFoute positie";
                 }
                 else
                 {
                     rect.StrokeThickness = 5;
                     rect.Stroke = Brushes.Transparent;
+                    rect.ToolTip = "Foute kleur";
                 }
-
+                ToolTipService.SetInitialShowDelay(rect, 0);
                 colorPanel.Children.Add(rect);
             }
             colorHistoryListBox.Items.Add(new ListBoxItem { Content = colorPanel });
@@ -204,6 +216,13 @@ namespace C_mastermindSprint1
             scoreTextBox.Text = $"Score: {score}"; // Bijwerken van de score
 
             labelScore.Content = $"Speler: {playerName} - Score: {score} - Pogingen: {guessAttempts}";
+            if (score <= 0)
+            {
+                MessageBox.Show($"Je score is 0. De correcte code was {string.Join(", ", secretCode)}.\n Nu is speler {GetNextPlayer()} aan de beurt.", $"{playerName}", MessageBoxButton.OK, MessageBoxImage.Information);
+                ResetGame();
+                return;
+            }
+
             if (inputColor.SequenceEqual(secretCode))
             {
                 timer.Stop();
@@ -217,6 +236,7 @@ namespace C_mastermindSprint1
             {
                 if (guessAttempts >= maxAttempts)
                 {
+                    score = 0;
                     timer.Stop();
                     MessageBoxResult result = MessageBox.Show
                         ($"Je hebt geen pogingen meer over. De correcte code was {string.Join(", ", secretCode)}.\n" +
@@ -241,6 +261,7 @@ namespace C_mastermindSprint1
         }
         private void ResetGame()
         {
+            UpdateHighScores();
             secretCode.Clear();
             var randomCode = new Random();
             for (int i = 0; i < 4; i++)
@@ -255,6 +276,8 @@ namespace C_mastermindSprint1
             ellipseTwo.Fill = ellipseColor[0];
             ellipseThree.Fill = ellipseColor[0];
             ellipseFour.Fill = ellipseColor[0];
+            score = 100;
+            guessAttempts = 0;
 
             if (multiplePlayers.IndexOf(playerName) == multiplePlayers.Count - 1)
             {
@@ -264,6 +287,8 @@ namespace C_mastermindSprint1
             {
                 playerName = GetNextPlayer();
             }
+            scoreTextBox.Text = $"Score: {score}";
+            labelScore.Content = $"Speler: {playerName} - Score: {score} - Pogingen: {guessAttempts}";
             StartGame();
         }
         private void HighScore()
@@ -281,6 +306,14 @@ namespace C_mastermindSprint1
         private void UpdateHighScores()
         {
             string newScore = $"{playerName} - {guessAttempts} pogingen - {score}/100";
+            for (int i = 0; i < highscores.Length; i++)
+            {
+                if (highscores[i] != null && highscores[i].StartsWith(playerName))
+                {
+                    highscores[i] = newScore;
+                    return;
+                }
+            }
             for (int i = 0; i < highscores.Length; i++)
             {
                 if (string.IsNullOrEmpty(highscores[i]))
@@ -403,7 +436,9 @@ namespace C_mastermindSprint1
         }
         private void Menu_Nieuw_Spel_Click(object sender, RoutedEventArgs e)
         {
-            ResetGame();
+            multiplePlayers.Clear();
+            maxAttempts = 0;
+            StartGame();
         }
         private void Menu_HighScores_Click(object sender, RoutedEventArgs e)
         {
@@ -416,10 +451,11 @@ namespace C_mastermindSprint1
         private void Menu_Aantal_Pogingen_Click(object sender, RoutedEventArgs e)
         {
             SetMaxAttempts();
+            MessageBox.Show($"Het maximaal aantal pogingen is nu ingesteld op {maxAttempts}.", "Aantal Pogingen", MessageBoxButton.OK, MessageBoxImage.Information);
         }
-
         private void buyHintButton_Click(object sender, RoutedEventArgs e)
         {
+            remainingTime = TimeSpan.FromMilliseconds(100) - (DateTime.Now - startedGuessTime);
             timer.Stop();
             MessageBoxResult result = MessageBox.Show("Wil je een hint kopen, het kost je wel strafpunten?", "Hint", 
                 MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -444,6 +480,7 @@ namespace C_mastermindSprint1
                 scoreTextBox.Text = $"Score: {score}";
                 labelScore.Content = $"Speler: {playerName} - Score: {score} - Pogingen: {guessAttempts}";
             }
+            startedGuessTime = DateTime.Now - (TimeSpan.FromMilliseconds(100) - remainingTime);
             timer.Start();
         }
         private void CorrectColor()
@@ -457,7 +494,7 @@ namespace C_mastermindSprint1
             Random hintCorrectColorAndPosition = new Random();
             int correctColorAndPosition = hintCorrectColorAndPosition.Next(secretCode.Count);
             string correctColor = secretCode[correctColorAndPosition];
-            MessageBox.Show($"Kleur + positie {correctColorAndPosition + 1} is: {correctColor}", "Hint", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show($"Kleur + positie {correctColorAndPosition + 1} is: {correctColor}", "Hint", MessageBoxButton.OK, MessageBoxImage.Information); 
         }
     }
 }
